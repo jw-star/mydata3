@@ -4,8 +4,23 @@
       <Loading></Loading>
     </div>
     <el-container>
-      <el-header></el-header>
+      <el-header>
+                  <el-card shadow="hover">
+        <el-row :gutter="10">
+            <el-col :span="4"></el-col>
+            <el-col :span="4"></el-col>
+            <el-col :span="4"></el-col>
+            <el-col :span="4"></el-col>
+            <el-col :span="4"></el-col>
+            <el-col :span="4">
+              <el-button type="primary" @click="logout">注 销</el-button>
+            </el-col>
+
+        </el-row>
+                  </el-card>
+      </el-header>
     </el-container>
+    <br /><br />
     <el-row :gutter="10">
       <el-col :span="6">
         <div class="grid-content bg-purple">
@@ -22,10 +37,11 @@
                 :key="item.id"
                 :label="item.siteAddress"
                 :value="item.id"
-                    >
+              >
                 <span style="float: left">{{ item.siteName }}</span>
-               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.siteAddress }}</span>
-          
+                <span style="float: right; color: #8492a6; font-size: 13px">{{
+                  item.siteAddress
+                }}</span>
               </el-option>
             </el-select>
             <el-tooltip placement="right">
@@ -88,7 +104,7 @@
               >
                 <el-input v-model="datalist[0][name]" style="margin-top: 4px">
                   <template #prepend>{{ name }}</template>
-                </el-input> 
+                </el-input>
               </el-col>
             </el-row>
           </el-card>
@@ -102,9 +118,9 @@
 <script>
 import Loading from "@/components/Loading";
 import { ref, onMounted } from "vue";
-import { getAll,getSite } from "@/api/index.js";
+import { getAll, getSite } from "@/api/index.js";
 import { useRouter } from "vue-router";
-import { ElNotification } from 'element-plus'
+import { ElNotification } from "element-plus";
 export default {
   name: "Home",
   components: {
@@ -123,15 +139,16 @@ export default {
       a = ref("ddd");
     const router = useRouter();
     onMounted(() => {
-       getSite().then((res)=>{
+      getSite()
+        .then((res) => {
           if (res.code == "005") {
-             sites.value=res.data
-             showLoading.value=false;
+            sites.value = res.data;
+            showLoading.value = false;
           }
-       }).catch((error)=>{
-         console.log(error)
-       })
-
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     });
 
     const search = (event) => {
@@ -147,21 +164,24 @@ export default {
         .replace(/([A-Z])/g, "_$1")
         .toLowerCase();
     };
+    const logout =()=>{
+        localStorage.removeItem('mydataToken')
+        router.push("/login");
+    }
+
     const send = () => {
       if (currtPage.value >= total.value) {
         currtPage.value = 1;
       } else {
         currtPage.value++;
       }
-      console.log(opValue.value)
-      getAll(
-        {
-          currtPage: currtPage.value,
-          size: 1,
-          textarea1: textarea1.value,
-          opValue: opValue.value,
-        }
-      ).then((res) => {
+      console.log(opValue.value);
+      getAll({
+        currtPage: currtPage.value,
+        size: 1,
+        textarea1: textarea1.value,
+        opValue: opValue.value,
+      }).then((res) => {
         if (res.code == "005") {
           res = res.data;
           console.log(res);
@@ -169,14 +189,17 @@ export default {
             total.value = res.datalist.total;
             datalist.value = res.datalist.records;
             currtPage.value = res.datalist.current;
-            showLoading.value=false;
+            showLoading.value = false;
             flag.value = true;
-          ElNotification({
-            showClose: true,
-            message: '数据生成成功！'
-          });
-
+            ElNotification({
+              showClose: true,
+              message: "数据生成成功！",
+            });
           } else {
+            ElNotification({
+              showClose: true,
+              message: "没有数据！",
+            });
             flag.value = false;
           }
         } else if (res.code == "026") {
@@ -198,6 +221,7 @@ export default {
       search,
       toLine,
       a,
+      logout
     };
   },
 };

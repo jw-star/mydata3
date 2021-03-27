@@ -1,6 +1,7 @@
 import axios from "axios"; // 引用axios
 import config from "@/api/config";
 import qs from "qs";
+import router from "@/router"
 const instance = axios.create({
   baseURL:   process.env.NODE_ENV==='production' ?  config.baseUrl.production: config.baseUrl.dev,
   timeout: 60000,
@@ -26,11 +27,13 @@ instance.interceptors.response.use(
     debugger
     // Do something with response data
     if(response.data.code == "026"){
-      alert('token过期,请刷新页面重新登录')
+      alert('token过期,请重新登录')
       localStorage.removeItem("mydataToken")
+      router.push('/login')
     }else if(response.data.code == "029"){
       alert('查询语法错误')
     }
+
     return response;
   },
   function(error) {
