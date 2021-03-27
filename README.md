@@ -1,5 +1,7 @@
 # mydata3
-
+```
+升级到vue3,router|axios封装|element+
+```
 ## Project setup
 ```
 npm install
