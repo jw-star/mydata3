@@ -1,0 +1,72 @@
+import axios from "axios"; // 引用axios
+import config from "@/api/config";
+import qs from "qs";
+const instance = axios.create({
+  baseURL:   process.env.NODE_ENV==='production' ?  config.baseUrl.production: config.baseUrl.dev,
+  timeout: 60000,
+});
+instance.interceptors.request.use(
+  function (config) {
+    if (localStorage.getItem('mydataToken')) {
+      config.headers.Authorization = localStorage.getItem('mydataToken');
+    }
+
+    return config;
+  },
+  function (error) {
+    // Do something with request error
+    alert("加载超时")
+    return Promise.reject(error);
+  }
+
+)
+
+instance.interceptors.response.use(
+  function(response) {
+    debugger
+    // Do something with response data
+    if(response.data.code == "026"){
+      alert('token过期,请刷新页面重新登录')
+      localStorage.removeItem("mydataToken")
+    }else if(response.data.code == "029"){
+      alert('查询语法错误')
+    }
+    return response;
+  },
+  function(error) {
+    // Do something with response error
+    console.log(error)
+    alert("响应错误")
+    return Promise.reject(error);
+  }
+)
+
+
+//get请求
+export function get(url, params = {}) {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(url, {
+        params: params,
+      })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+}
+//post请求
+export function post(url, data = {}) {
+  return new Promise((resolve, reject) => {
+    instance.post(url, qs.stringify(data,{arrayFormat:'repeat'})).then(
+      (response) => {
+        resolve(response.data);
+      },
+      (err) => {
+        reject(err);
+      }
+    );
+  });
+}
